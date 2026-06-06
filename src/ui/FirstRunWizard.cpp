@@ -24,6 +24,10 @@ FirstRunWizard::FirstRunWizard(QWidget *parent)
     setWindowIcon(QIcon(":/icons/pen.svg"));
     setFixedSize(560, 430);
     setModal(true);
+    // Drop the context-help (?) title-bar button. On Windows-on-ARM its window
+    // style (WS_EX_CONTEXTHELP) causes the title-bar drag to jump off-screen;
+    // AboutDialog clears the same flag and is unaffected.
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     setupUi();
     loadDefaults();
