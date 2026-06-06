@@ -35,6 +35,7 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QProcess>
+#include <QMessageBox>
 
 #include "core/HotkeyManager.h"
 #include "core/TranslationManager.h"
@@ -861,6 +862,18 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
     app.setApplicationName("EShot");
+
+    // TEMP DIAGNOSTIC: report what Qt thinks the screen geometry is, to confirm
+    // whether the off-screen dialog placement comes from a wrong work-area rect.
+    if (QScreen *s = QGuiApplication::primaryScreen()) {
+        const QRect g = s->geometry();
+        const QRect a = s->availableGeometry();
+        QMessageBox::information(nullptr, QStringLiteral("EShot screen debug"),
+            QStringLiteral("geometry: %1,%2 %3x%4\navailable: %5,%6 %7x%8\nDPR: %9")
+                .arg(g.x()).arg(g.y()).arg(g.width()).arg(g.height())
+                .arg(a.x()).arg(a.y()).arg(a.width()).arg(a.height())
+                .arg(s->devicePixelRatio()));
+    }
     app.setApplicationVersion(ESHOT_VERSION_STRING);
     app.setOrganizationName("EShot");
     app.setQuitOnLastWindowClosed(false);

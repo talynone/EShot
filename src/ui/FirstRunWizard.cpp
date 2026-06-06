@@ -205,20 +205,11 @@ void FirstRunWizard::setupUi()
     QLabel *hkDesc = new QLabel(TranslationManager::wizardHotkeyDesc());
     hkDesc->setWordWrap(true);
     hkLayout->addWidget(hkDesc);
-    m_hotkeyEdit = new QKeySequenceEdit(this);
+    m_hotkeyEdit = new QKeySequenceEdit();
     m_hotkeyEdit->setMinimumHeight(38);
     connect(m_hotkeyEdit, &QKeySequenceEdit::keySequenceChanged,
             this, &FirstRunWizard::onHotkeyChanged);
-    // DIAGNOSTIC (temporary): keep the real QKeySequenceEdit hidden, and put a
-    // same-height plain QLineEdit in its place. If the wizard now jumps again,
-    // the cause is the layout height (not the widget); if it stays put, the
-    // QKeySequenceEdit widget itself is the culprit.
-    m_hotkeyEdit->hide();
-    QLineEdit *hotkeyPlaceholder = new QLineEdit();
-    hotkeyPlaceholder->setMinimumHeight(38);
-    hotkeyPlaceholder->setReadOnly(true);
-    hkLayout->addWidget(hotkeyPlaceholder);
-    // hkLayout->addWidget(m_hotkeyEdit);
+    hkLayout->addWidget(m_hotkeyEdit);
 
     m_hotkeyStatusLabel = new QLabel();
     m_hotkeyStatusLabel->setStyleSheet("font-size: 12px;");
