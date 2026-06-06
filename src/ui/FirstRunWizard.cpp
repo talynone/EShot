@@ -24,10 +24,6 @@ FirstRunWizard::FirstRunWizard(QWidget *parent)
     setWindowIcon(QIcon(":/icons/pen.svg"));
     setFixedSize(560, 430);
     setModal(true);
-    // Drop the context-help (?) title-bar button. On Windows-on-ARM its window
-    // style (WS_EX_CONTEXTHELP) causes the title-bar drag to jump off-screen;
-    // AboutDialog clears the same flag and is unaffected.
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     setupUi();
     loadDefaults();
@@ -209,11 +205,15 @@ void FirstRunWizard::setupUi()
     QLabel *hkDesc = new QLabel(TranslationManager::wizardHotkeyDesc());
     hkDesc->setWordWrap(true);
     hkLayout->addWidget(hkDesc);
-    m_hotkeyEdit = new QKeySequenceEdit();
+    m_hotkeyEdit = new QKeySequenceEdit(this);
     m_hotkeyEdit->setMinimumHeight(38);
     connect(m_hotkeyEdit, &QKeySequenceEdit::keySequenceChanged,
             this, &FirstRunWizard::onHotkeyChanged);
-    hkLayout->addWidget(m_hotkeyEdit);
+    // DIAGNOSTIC (temporary): keep the object so the hotkey logic still works,
+    // but don't show/lay it out — to confirm whether QKeySequenceEdit is what
+    // makes the wizard snap off-screen. Restore the addWidget line after testing.
+    m_hotkeyEdit->hide();
+    // hkLayout->addWidget(m_hotkeyEdit);
 
     m_hotkeyStatusLabel = new QLabel();
     m_hotkeyStatusLabel->setStyleSheet("font-size: 12px;");

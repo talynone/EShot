@@ -166,10 +166,6 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     setWindowIcon(QIcon(":/icons/pen.svg"));
     setMinimumSize(560, 580);
     setMaximumSize(750, 720);
-    // Drop the context-help (?) title-bar button. On Windows-on-ARM its window
-    // style (WS_EX_CONTEXTHELP) causes the title-bar drag to jump off-screen;
-    // AboutDialog clears the same flag and is unaffected.
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     m_settings = new QSettings("EShot", "EShot", this);
     setupUI();
