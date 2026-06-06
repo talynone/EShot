@@ -16,6 +16,8 @@
 #include <QFont>
 #include <QDir>
 #include <QMessageBox>
+#include <QScreen>
+#include <QGuiApplication>
 
 FirstRunWizard::FirstRunWizard(QWidget *parent)
     : QDialog(parent)
@@ -27,6 +29,18 @@ FirstRunWizard::FirstRunWizard(QWidget *parent)
 
     setupUi();
     loadDefaults();
+
+    // Position explicitly before the first show. Qt's automatic placement for
+    // parentless dialogs is broken on Windows-on-ARM (it drops taller windows
+    // off the top of the screen and then fights drags). Setting an explicit
+    // position makes Qt skip auto-placement, so the window appears centered and
+    // stays where the user moves it.
+    if (QScreen *scr = QGuiApplication::primaryScreen()) {
+        const QRect a = scr->availableGeometry();
+        const QSize sz = sizeHint().boundedTo(maximumSize()).expandedTo(minimumSize());
+        move(a.x() + (a.width()  - sz.width())  / 2,
+             a.y() + (a.height() - sz.height()) / 2);
+    }
 }
 
 FirstRunWizard::~FirstRunWizard() {}

@@ -26,6 +26,8 @@
 #include <QGridLayout>
 #include <QScrollArea>
 #include <QFrame>
+#include <QScreen>
+#include <QGuiApplication>
 #include <algorithm>
 
 #ifdef Q_OS_WIN
@@ -170,6 +172,18 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent)
     m_settings = new QSettings("EShot", "EShot", this);
     setupUI();
     loadSettings();
+
+    // Position explicitly before the first show. Qt's automatic placement for
+    // parentless dialogs is broken on Windows-on-ARM (it drops taller windows
+    // off the top of the screen and then fights drags). Setting an explicit
+    // position makes Qt skip auto-placement, so the window appears centered and
+    // stays where the user moves it.
+    if (QScreen *scr = QGuiApplication::primaryScreen()) {
+        const QRect a = scr->availableGeometry();
+        const QSize sz = sizeHint().boundedTo(maximumSize()).expandedTo(minimumSize());
+        move(a.x() + (a.width()  - sz.width())  / 2,
+             a.y() + (a.height() - sz.height()) / 2);
+    }
 }
 
 SettingsDialog::~SettingsDialog() {}
