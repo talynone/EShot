@@ -167,6 +167,47 @@ bool HotkeyManager::nativeEventFilter(const QByteArray &eventType, void *message
     Q_UNUSED(result);
     if (eventType == "windows_generic_MSG" || eventType == "windows_dispatcher_MSG") {
         MSG *msg = static_cast<MSG*>(message);
+
+        // Stopgap for a Windows-on-ARM Qt bug where the native move loop drives a
+        // captioned dialog off-screen ("title bar jumps off the top"). Clamp the
+        // proposed window position into the target monitor's work area *before*
+        // it is applied, so the title bar always stays reachable. Scoped to
+        // captioned top-level windows so it never touches the frameless capture
+        // overlay, pinned windows, etc. Coordinates here are physical pixels,
+        // matching MONITORINFO, so this is DPI-agnostic.
+        if (msg->message == WM_WINDOWPOSCHANGING) {
+            WINDOWPOS *wp = reinterpret_cast<WINDOWPOS*>(msg->lParam);
+            if (wp && !(wp->flags & SWP_NOMOVE)) {
+                const LONG_PTR style = GetWindowLongPtr(msg->hwnd, GWL_STYLE);
+                if ((style & WS_CAPTION) == WS_CAPTION && !(style & WS_CHILD)) {
+                    int w = wp->cx;
+                    int h = wp->cy;
+                    if (wp->flags & SWP_NOSIZE) {
+                        RECT r;
+                        if (GetWindowRect(msg->hwnd, &r)) {
+                            w = r.right - r.left;
+                            h = r.bottom - r.top;
+                        }
+                    }
+                    RECT pr = { wp->x, wp->y, wp->x + w, wp->y + h };
+                    HMONITOR mon = MonitorFromRect(&pr, MONITOR_DEFAULTTONEAREST);
+                    MONITORINFO mi;
+                    mi.cbSize = sizeof(mi);
+                    if (mon && GetMonitorInfoW(mon, &mi)) {
+                        const RECT wa = mi.rcWork;
+                        // Keep the top-left edge on-screen (priority), so the
+                        // title bar is always grabbable even if the window is
+                        // larger than the work area.
+                        if (wp->x + w > wa.right)  wp->x = wa.right - w;
+                        if (wp->y + h > wa.bottom) wp->y = wa.bottom - h;
+                        if (wp->x < wa.left)       wp->x = wa.left;
+                        if (wp->y < wa.top)        wp->y = wa.top;
+                    }
+                }
+            }
+            return false;   // let Qt process the adjusted WINDOWPOS
+        }
+
         if (msg->message == WM_HOTKEY) {
             int id = static_cast<int>(msg->wParam);
             emit hotkeyTriggered(id);
