@@ -26,10 +26,6 @@ FirstRunWizard::FirstRunWizard(QWidget *parent)
     setWindowIcon(QIcon(":/icons/pen.svg"));
     setFixedSize(560, 430);
     setModal(true);
-    // PROBE: use the dedicated fixed-size dialog frame. This changes the native
-    // window's non-client frame and move path on Windows; testing whether it
-    // stops the title-bar drag jump on Windows-on-ARM.
-    setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
 
     setupUi();
     loadDefaults();
