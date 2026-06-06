@@ -7,7 +7,7 @@ on:
 
 env:
   APP_VERSION: '3.0.0'
-  QT_VERSION: '6.8.2'
+  QT_VERSION: '6.9.3'
 
 jobs:
   build:
