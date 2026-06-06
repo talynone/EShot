@@ -209,10 +209,15 @@ void FirstRunWizard::setupUi()
     m_hotkeyEdit->setMinimumHeight(38);
     connect(m_hotkeyEdit, &QKeySequenceEdit::keySequenceChanged,
             this, &FirstRunWizard::onHotkeyChanged);
-    // DIAGNOSTIC (temporary): keep the object so the hotkey logic still works,
-    // but don't show/lay it out — to confirm whether QKeySequenceEdit is what
-    // makes the wizard snap off-screen. Restore the addWidget line after testing.
+    // DIAGNOSTIC (temporary): keep the real QKeySequenceEdit hidden, and put a
+    // same-height plain QLineEdit in its place. If the wizard now jumps again,
+    // the cause is the layout height (not the widget); if it stays put, the
+    // QKeySequenceEdit widget itself is the culprit.
     m_hotkeyEdit->hide();
+    QLineEdit *hotkeyPlaceholder = new QLineEdit();
+    hotkeyPlaceholder->setMinimumHeight(38);
+    hotkeyPlaceholder->setReadOnly(true);
+    hkLayout->addWidget(hotkeyPlaceholder);
     // hkLayout->addWidget(m_hotkeyEdit);
 
     m_hotkeyStatusLabel = new QLabel();
